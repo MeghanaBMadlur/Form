@@ -6,10 +6,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $gender = $_POST["Gender"] ?? "";
     $tel = $_POST["tel"] ?? "";
 
-    // Save data (you can add code here if saving to file/database)
-    echo "Data saved successfully!";
+    // 🔐 Replace with your own DB credentials from Render
+    $host = "dpg-d0ip8815pdvs739o2aog-a";
+    $port = "5432"; // usually 5432 for PostgreSQL
+    $dbname = "studentform_db";
+    $user = "studentform_db_user";
+    $password = "AE2Ejq9TsTtQ8VAAEMzg41aIQTq8KVgP";
+
+    try {
+        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+        $pdo = new PDO($dsn, $user, $password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // ✅ Create table if not exists
+        $pdo->exec("CREATE TABLE IF NOT EXISTS student_form (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            sem TEXT,
+            mail TEXT,
+            gender TEXT,
+            tel TEXT
+        )");
+
+        // ✅ Insert the submitted data
+        $sql = "INSERT INTO student_form (name, sem, mail, gender, tel) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$name, $sem, $mail, $gender, $tel]);
+
+        echo "Data saved successfully!";
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
 } else {
-    // Show the form when the page is opened
+    // Show the form
     ?>
     <h2>Student Form</h2>
     <form method="POST">
